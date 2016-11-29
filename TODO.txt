@@ -1,0 +1,15 @@
+TODO:
+    Interactive Prompt
+    pick port. Give IP
+    Pick our ship position. Random y/n?
+    Display The Current Board
+    Display your guess board
+    Make a guess
+        Send that guess to the other player. 
+        Wait on socket until you get back y/n
+    Update board on success.
+    Check if won
+    wait for guess
+    return to display and make a guess
+
+
