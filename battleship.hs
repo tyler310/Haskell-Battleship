@@ -4,20 +4,31 @@ module Battleship where
 -- import battleNet
 import MagicSum
 
+data GameState p1board p2board p1boats p2boats turn = GameState {
+                    p1_board :: p1board,
+                    p2_board :: p2board, -- [(1,0,h),(2,2,m)] the hits and misses
+                    p1_boats :: p1_boats, -- [(1,0), (2,0)] your boats
+                    p2_boats :: p2_boats
+                    next_turn :: turn} deriving (Eq, Show)
+                    
+                    
+class Battleship a player p1board p2board p1boats p2boats where
+    cur_player :: a -> player
+    get_p1_board :: a-> p1board
+    get_p2_board :: a-> p2board
+    get_p1_boats :: a -> p1boats
+    get p2_boats :: a -> p2boats
+    
+    check_guess :: (Int, Int) -> Bool
+    
+    update_board :: [(Int, Int)] -> [(Int, Int)]
+    
+    -- guess: gets user's guess, send it, update board (hit/miss), signal end of turn
+    guess :: (Int, Int) -> a
+    
+    
+    
+    
 
-battleship:: Game -> Result -> (Int, AMove)
--- battleship game result   =>  (value_to_player, move)
-battleship game (ContinueGame st avail)  =
-      maximum [value game (game (Move amove st)) amove
-               | amove <- avail]
-
--- value game result move = (value,move) for current player of the state after move given result
-value:: Game -> Result -> AMove -> (Int, AMove)
-value _  (EndOfGame val) move = (val,move)
-value game res move = 
-   let (val,_) = battleship game res   -- (value,move) for next player
-   in (-val,move)  -- value for current player is negative of value of the other player
-
-
-mm_player:: Player
-mm_player game result = snd ( battleship game result)
+    
+placeBoats :: [] -> [(Int, Int)]

@@ -5,8 +5,9 @@ module MagicSum where
 -- ghci
 -- :load MagicSum
 
-type AMove = Int                  -- a move for a player
-type State = ([AMove], [AMove])   -- (mine,other's)
+type AMove = (Int, Int)                  -- a move for a player
+type State = [AMove,AMove]
+--type State = ([AMove], [AMove])   -- (mine,other's)
 
 data Action = Move AMove State   -- do AMove in State
             | Start              -- returns starting state
