@@ -6,7 +6,9 @@ import Control.Monad
 
 
 p_board = [[(0,1),(6,7)],[(6,8),(0,0)]]
-o_board = []             
+o_board = []
+row = 5
+col = row             
 
 check_guess :: (Int, Int) -> [[(Int, Int)]] -> Bool
 check_guess coord lst 
@@ -34,7 +36,21 @@ update_board g hit lst
 --p_board :: [(Int, Int)]
 -- generating boats eventually
 
+-- print top/bottom border
+print_border 0 = do 
+    putStrLn ("+")
+    return ()
+    
+print_border n = do
+    putStr ("+----")
+    print_border (n-1)
+    
+-- print out the board
+--print_board 0 0 []
 
+--print_board row col []
+
+--print_board row col boats
 
 main = forever $ do
     -- Guess
@@ -51,4 +67,5 @@ main = forever $ do
     guess
 
 
+-- need a start_game that does the set up and calls main    
     
