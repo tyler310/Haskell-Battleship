@@ -6,5 +6,5 @@ import Data.IP
 
 
 battleship:: Int -> [Int] -> Int -> IO ()
-battleship(ownPort, destAddr, destPort) = engageBattleNet(ownPort, (toHostAddress (toIPv4 destAddr)), destPort)
+battleship ownPort destAddr destPort = engageBattleNet ownPort (toHostAddress (toIPv4 destAddr)) destPort
 
