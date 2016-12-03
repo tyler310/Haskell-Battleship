@@ -44,16 +44,23 @@ print_border 0 = do
 print_border n = do
     putStr ("+----")
     print_border (n-1)
+
+print_col_num x 0 = do
+    putStr("\n")
+    return()
     
--- print out the board
+print_col_num x col = do
+    putStr("  " ++ show x ++ "  ")
+    print_col_num (x+1) (col-1)
+
 print_end str = do
     putStrLn str
     return()
 
 print_row x y col boats
     | x == col = print_end("|")
-    | check_if_boat (x,y) boats = print_cell("| X ")
-    | otherwise = print_cell("|   ")
+    | check_if_boat (x,y) boats = print_cell("| X  ")
+    | otherwise = print_cell("|    ")
     where
         print_cell str = do
             putStr(str)
@@ -63,10 +70,19 @@ print_board y 0 col boats = do
     return()
   
 print_board y row col boats = do
+    putStr(show y ++ " ")
     print_row 0 y col boats
     print_board (y+1) (row-1) col boats
 
-print_screen row col boats = print_board 0 row col boats
+print_screen row col boats = do
+    putStr("   ")
+    print_col_num 0 col
+    putStr("  ")
+    print_border col
+    print_board 0 row col boats
+    putStr("  ")
+    print_border col
+    return()
 
 main = forever $ do
     -- Guess
