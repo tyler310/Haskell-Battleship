@@ -36,7 +36,7 @@ update_board g hit lst
 --p_board :: [(Int, Int)]
 -- generating boats eventually
 
--- print top/bottom border
+-- print_border prints the top/bottom boards
 print_border 0 = do 
     putStrLn ("+")
     return ()
@@ -45,6 +45,7 @@ print_border n = do
     putStr ("+----")
     print_border (n-1)
 
+-- print_col_num prints the column numbers for the user    
 print_col_num x 0 = do
     putStr("\n")
     return()
@@ -56,7 +57,7 @@ print_col_num x col = do
 print_end str = do
     putStrLn str
     return()
-
+-- print_row prints a row from the gameboard, including any boats as X's
 print_row x y col boats
     | x == col = print_end("|")
     | check_if_boat (x,y) boats = print_cell("| X  ")
@@ -65,7 +66,8 @@ print_row x y col boats
         print_cell str = do
             putStr(str)
             print_row (x+1) y col boats
-  
+
+-- print_board prints all the rows of the game grid            
 print_board y 0 col boats = do
     return()
   
@@ -73,7 +75,12 @@ print_board y row col boats = do
     putStr(show y ++ " ")
     print_row 0 y col boats
     print_board (y+1) (row-1) col boats
-
+    
+-- print_screen prints the entire game boards including row/col numbers for the user
+-- row: the number of rows
+-- col: the number of columns
+-- boats: the list of boats to display
+-- example (prints empty grid)    print_screen 5 5 []
 print_screen row col boats = do
     putStr("   ")
     print_col_num 0 col
