@@ -10,8 +10,8 @@ o_board = []
 row = 5
 col = row             
 
-check_guess :: (Int, Int) -> [[(Int, Int)]] -> Bool
-check_guess coord lst 
+check_if_boat :: (Int, Int) -> [[(Int, Int)]] -> Bool
+check_if_boat coord lst 
     | coord `elem` concat lst = True
     | otherwise = False
     
@@ -25,7 +25,7 @@ guess = do
     putStrLn ("You guessed " ++ g)
     let input = read g
     -- need to SEND the guess, remove line below
-    let ans = check_guess input p_board -- replace this with the send guess function
+    let ans = check_if_boat input p_board -- replace this with the send guess function
     return (input, ans)
     
     
@@ -46,11 +46,27 @@ print_border n = do
     print_border (n-1)
     
 -- print out the board
---print_board 0 0 []
+print_end str = do
+    putStrLn str
+    return()
 
---print_board row col []
+print_row x y col boats
+    | x == col = print_end("|")
+    | check_if_boat (x,y) boats = print_cell("| X ")
+    | otherwise = print_cell("|   ")
+    where
+        print_cell str = do
+            putStr(str)
+            print_row (x+1) y col boats
+  
+print_board y 0 col boats = do
+    return()
+  
+print_board y row col boats = do
+    print_row 0 y col boats
+    print_board (y+1) (row-1) col boats
 
---print_board row col boats
+print_screen row col boats = print_board 0 row col boats
 
 main = forever $ do
     -- Guess
@@ -67,5 +83,6 @@ main = forever $ do
     guess
 
 
--- need a start_game that does the set up and calls main    
+-- need a start_game that does the set up and calls main   
+-- has some welcome msg 
     
