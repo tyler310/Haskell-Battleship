@@ -8,8 +8,7 @@ import GameBoard
 
 p_board = [(0,1),(6,7),(6,8),(0,0)]
 o_board = []
-row = 5
-col = row             
+            
 
 check_if_boat :: (Int, Int) -> [(Int, Int)] -> Bool
 check_if_boat coord lst 
@@ -100,7 +99,7 @@ start_game = do
     return()
     
 
-main = forever $ do
+main gb = forever $ do
     -- Guess
     (g, ans) <- guess
     -- Update the o_board depending on the result
