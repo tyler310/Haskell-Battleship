@@ -4,6 +4,8 @@ import System.Random
 import Control.Monad
 
 
+
+
 check_pos (x,y) dir len row col boats
     | dir == 1 = check_pos_r (x,y) len row col boats
     | dir == 2 = check_pos_d (x,y) len row col boats
@@ -37,68 +39,60 @@ check_pos (x,y) dir len row col boats
             | len > 0 = check_pos_u (x,(y-1)) (len-1) row col boats       
             
 place_ship_r (x,y) len
-    | len > 0 = [(x,y)] : place_ship_r ((x+1),y) (len-1)
+    | len > 0 = (x,y) : place_ship_r ((x+1),y) (len-1)
     | otherwise = []
 
 place_ship_d (x,y) len
-    | len > 0 = [(x,y)] : place_ship_d (x,(y+1)) (len-1)
+    | len > 0 = (x,y) : place_ship_d (x,(y+1)) (len-1)
     | otherwise = []
 
 place_ship_l (x,y) len
-    | len > 0 = [(x,y)] : place_ship_l ((x-1),y) (len-1)
+    | len > 0 = (x,y) : place_ship_l ((x-1),y) (len-1)
     | otherwise = []
 
 place_ship_u (x,y) len
-    | len > 0 = [(x,y)] : place_ship_u (x,(y-1)) (len-1)
+    | len > 0 = (x,y) : place_ship_u (x,(y-1)) (len-1)
     | otherwise = []      
 
+prepend_list [] lst = lst
+prepend_list (h:t) lst = h : prepend_list t lst
+    
 -- creates a list of coords of a ship, if it doesn't overlap with any existing ships
 -- 1 = build ship to the right
 -- 2 = down
 -- 3 = left
 -- 4 = up
 create_ship dir (x,y) len row col boats 
-        | dir == 1 = ((check_pos (x,y) dir len row col boats), [concat (place_ship_r (x,y) len)])
-        | dir == 2 = ((check_pos (x,y) dir len row col boats), [concat (place_ship_d (x,y) len)])
-        | dir == 3 = ((check_pos (x,y) dir len row col boats), [concat (place_ship_l (x,y) len)])
-        | dir == 4 = ((check_pos (x,y) dir len row col boats), [concat (place_ship_u (x,y) len)])
-        | otherwise = ((check_pos (x,y) dir len row col boats), [])
+        | dir == 1 = prepend_list boats (place_ship_r (x,y) len)
+        | dir == 2 = prepend_list boats (place_ship_d (x,y) len)
+        | dir == 3 = prepend_list boats (place_ship_l (x,y) len)
+        | dir == 4 = prepend_list boats (place_ship_u (x,y) len)
+        | otherwise = boats 
 
-create_destroyer (bool, boat) lst
-        | bool = boat
-        | otherwise =  create_destroyer (bool, boat) lst
-        
-        
-create_player_ships n lst
-    | n == 4 = lst : create_destroyer (False,[]) lst : create_player_ships (n-1)
-    | otherwise = []
-
-create_player_ships = do
-    -- create the destroyer (2 spaces)
-    d_dir <- randomRIO(1,4) :: IO Int
-    d_x <- randomRIO(0,9) :: IO Int
-    d_y <- randomRIO(0,9) :: IO Int   
-    let (d_success, destroyer) = create_ship d_dir (d_x, d_y) 2 10 10 []
-    putStrLn(show d_success)
-    putStrLn(show destroyer)
     
-    -- create the submarine
-    s_dir <- randomRIO(1,4) :: IO Int
-    s_x <- randomRIO(0,9) :: IO Int
-    s_y <- randomRIO(0,9) :: IO Int 
-    let (s_success, submarine) = create_ship s_dir (s_x, s_y) 3 10 10 (concat destroyer)
-    putStrLn(show s_success)
-    putStrLn(show submarine)
-
-    -- create the battleship
-    b_dir <- randomRIO(1,4) :: IO Int
-    b_x <- randomRIO(0,9) :: IO Int
-    b_y <- randomRIO(0,9) :: IO Int 
-    --let (b_success, battleship) = create_ship b_dir (b_x, b_y) 3 10 10  (submarine : destroyer)
-    --putStrLn(show b_success)
-    --putStrLn(show battleship)   
+create_all_ships 2 row col boats = do
+    x <- randomRIO(0,9) :: IO Int
+    y <- randomRIO(0,9) :: IO Int
+    dir <- randomRIO(1,4) :: IO Int
     
-    return()
+    if check_pos (x,y) dir 2 row col boats
+        then         
+            return (create_ship dir (x,y) 2 row col boats)
+        else
+            create_all_ships 2 row col boats
+    
+create_all_ships n row col boats = do
+    x <- randomRIO(0,9) :: IO Int
+    y <- randomRIO(0,9) :: IO Int
+    dir <- randomRIO(1,4) :: IO Int
+    
+    if (check_pos (x,y) dir n row col boats)
+        then
+            create_all_ships (n-1) row col (create_ship dir (x,y) n row col boats) 
+        else
+            create_all_ships n row col boats
+       
+
 
 
 
