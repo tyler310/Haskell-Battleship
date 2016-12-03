@@ -3,16 +3,17 @@ module Battleship where
 
 -- import battleNet
 import Control.Monad
+import GameBoard
 
 
-p_board = [[(0,1),(6,7)],[(6,8),(0,0)]]
+p_board = [(0,1),(6,7),(6,8),(0,0)]
 o_board = []
 row = 5
 col = row             
 
-check_if_boat :: (Int, Int) -> [[(Int, Int)]] -> Bool
+check_if_boat :: (Int, Int) -> [(Int, Int)] -> Bool
 check_if_boat coord lst 
-    | coord `elem` concat lst = True
+    | coord `elem` lst = True
     | otherwise = False
     
 --update_board :: [(Int, Int)] -> [(Int, Int)]
@@ -89,6 +90,12 @@ print_screen row col boats = do
     print_board 0 row col boats
     putStr("  ")
     print_border col
+    return()
+    
+start_game = do
+    a <-  create_all_ships 5 10 10 []
+    putStrLn(show a)
+    print_screen 10 10 a
     return()
     
 

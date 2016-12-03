@@ -1,4 +1,4 @@
-module Ships where
+module GameBoard where
 
 import System.Random
 import Control.Monad
