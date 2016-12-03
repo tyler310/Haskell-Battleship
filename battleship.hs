@@ -90,6 +90,7 @@ print_screen row col boats = do
     putStr("  ")
     print_border col
     return()
+    
 
 main = forever $ do
     -- Guess
