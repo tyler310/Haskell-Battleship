@@ -82,8 +82,8 @@ create_all_ships 2 row col boats = do
             create_all_ships 2 row col boats
     
 create_all_ships n row col boats = do
-    x <- randomRIO(0,9) :: IO Int
-    y <- randomRIO(0,9) :: IO Int
+    x <- randomRIO(0,(col-1)) :: IO Int
+    y <- randomRIO(0,(row-1)) :: IO Int
     dir <- randomRIO(1,4) :: IO Int
     
     if (check_pos (x,y) dir n row col boats)

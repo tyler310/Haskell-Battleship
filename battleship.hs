@@ -93,9 +93,10 @@ print_screen row col boats = do
     return()
     
 start_game = do
-    a <-  create_all_ships 5 10 10 []
+    putStrLn("Your grid (X = boat): ")
+    a <-  create_all_ships 5 7 7 []
     putStrLn(show a)
-    print_screen 10 10 a
+    print_screen 7 7 a
     return()
     
 
