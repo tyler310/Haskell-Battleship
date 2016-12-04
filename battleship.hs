@@ -127,7 +127,7 @@ main gb ob hit_boats guesses = do
     putStrLn("OPPONENT: ")
     print_screen max_row max_col ob ob
 
-    -- TODO: possibly create a player 2 that accepts a guess first, THEN sends the guess (but otherwise the same)
+    -- TODO: possibly create a player 2 file that accepts a guess first, THEN sends the guess (but otherwise the same)
     -- Get user guess
     (g, ans) <- guess
     -- Update the o_board depending on the result
