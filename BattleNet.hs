@@ -97,8 +97,8 @@ engageBattleNet ownPort destAddr destPort starter = do
 
     --return opponentSock
    
-    fireAllCannons opponentSock (0,0) starter
-    connectionClose clientSock opponentSock
+    --fireAllCannons opponentSock (0,0) starter
+    --connectionClose clientSock opponentSock
     return opponentSock
 
 fireAllCannons :: Socket -> (Int, Int) -> Bool -> IO ()
