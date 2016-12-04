@@ -1,9 +1,10 @@
 -- CPSC 312 - 2016 - Games in Haskell
 module Battleship where
 
--- import BattleNet
-import Control.Monad
+import BattleNet
 import GameBoard
+import Control.Monad
+import Data.IP
 
 
 p_board = [(0,1),(6,7),(6,3),(0,0),(1,1)]
@@ -110,8 +111,10 @@ check_win_lose_2 n ob tot
 
 
 -- sets up the game board by placing the ships, starts the game by calling main
-start_game :: IO ()    
-start_game = do
+start_game:: Int -> [Int] -> Int -> Bool -> IO ()
+start_game ownPort destAddr destPort starter = do
+    opp_sock <- engageBattleNet ownPort (toHostAddress (toIPv4 destAddr)) destPort starter
+    
     putStrLn("Your grid (B = boat, X = hit): ")
     a <-  create_all_ships max_ship_size max_row max_col []
     putStrLn(show a)
@@ -163,4 +166,5 @@ main gb ob hit_boats guesses = do
                 main gb new_o_board hit_boats new_guesses -- TODO replace hit_boats with the name for the updated list
 
 
-    
+
+
