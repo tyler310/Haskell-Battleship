@@ -5,7 +5,7 @@ import Control.Monad
 
 
 
-
+check_pos :: (Int, Int) -> Int -> Int -> Int -> Int -> [(Int, Int)] -> Bool
 check_pos (x,y) dir len row col boats
     | dir == 1 = check_pos_r (x,y) len row col boats
     | dir == 2 = check_pos_d (x,y) len row col boats
@@ -37,23 +37,28 @@ check_pos (x,y) dir len row col boats
             | y > row = False
             | y < 0 = False
             | len > 0 = check_pos_u (x,(y-1)) (len-1) row col boats       
-            
+
+place_ship_r :: (Int, Int) -> Int -> [(Int, Int)]            
 place_ship_r (x,y) len
     | len > 0 = (x,y) : place_ship_r ((x+1),y) (len-1)
     | otherwise = []
 
+place_ship_d :: (Int, Int) -> Int -> [(Int, Int)]  
 place_ship_d (x,y) len
     | len > 0 = (x,y) : place_ship_d (x,(y+1)) (len-1)
     | otherwise = []
 
+place_ship_l :: (Int, Int) -> Int -> [(Int, Int)]      
 place_ship_l (x,y) len
     | len > 0 = (x,y) : place_ship_l ((x-1),y) (len-1)
     | otherwise = []
 
+place_ship_u :: (Int, Int) -> Int -> [(Int, Int)]      
 place_ship_u (x,y) len
     | len > 0 = (x,y) : place_ship_u (x,(y-1)) (len-1)
     | otherwise = []      
 
+prepend_list :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)]
 prepend_list [] lst = lst
 prepend_list (h:t) lst = h : prepend_list t lst
     
@@ -62,6 +67,7 @@ prepend_list (h:t) lst = h : prepend_list t lst
 -- 2 = down
 -- 3 = left
 -- 4 = up
+create_ship :: Int -> (Int, Int) -> Int -> Int -> Int -> [(Int, Int)] -> [(Int, Int)]
 create_ship dir (x,y) len row col boats 
         | dir == 1 = prepend_list boats (place_ship_r (x,y) len)
         | dir == 2 = prepend_list boats (place_ship_d (x,y) len)
@@ -69,7 +75,7 @@ create_ship dir (x,y) len row col boats
         | dir == 4 = prepend_list boats (place_ship_u (x,y) len)
         | otherwise = boats 
 
-    
+create_all_ships :: Int -> Int -> Int -> [(Int, Int)] -> IO [(Int, Int)]    
 create_all_ships 2 row col boats = do
     x <- randomRIO(0,(col-1)) :: IO Int
     y <- randomRIO(0,(row-1)) :: IO Int
