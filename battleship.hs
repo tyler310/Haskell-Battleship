@@ -5,6 +5,7 @@ import BattleNet
 import GameBoard
 import Control.Monad
 import Data.IP
+import Network.Socket
 
 
 p_board = [(0,1),(6,7),(6,3),(0,0),(1,1)]
@@ -118,12 +119,12 @@ start_game ownPort destAddr destPort starter = do
     putStrLn("Your grid (B = boat, X = hit): ")
     a <-  create_all_ships max_ship_size max_row max_col []
     putStrLn(show a)
-    main a [] [] []
+    main a [] [] [] opp_sock
 
 
 -- the main game function    
-main :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> IO ()     
-main gb ob hit_boats guesses = do
+main :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> Socket -> IO ()     
+main gb ob hit_boats guesses opp_sock = do
     -- Show your game board + your progress
     putStrLn("YOU: ")
     print_screen max_row max_col gb hit_boats
@@ -163,7 +164,7 @@ main gb ob hit_boats guesses = do
                 putStrLn(show new_o_board)
                 putStr("all guesses ")
                 putStrLn(show new_guesses)
-                main gb new_o_board hit_boats new_guesses -- TODO replace hit_boats with the name for the updated list
+                main gb new_o_board hit_boats new_guesses opp_sock-- TODO replace hit_boats with the name for the updated list
 
 
 

@@ -11,8 +11,6 @@ openSock :: Int -> ConSock Socket -> IO()
 openSock port (ConSock status) = do
     sock <- socket AF_INET Stream 0
     setSocketOption sock ReuseAddr 1
-    setSocketOption sock SendTimeOut 10
-    setSocketOption sock RecvTimeOut 10
     let portNum = fromInteger(toInteger port) :: PortNumber
     bind sock (SockAddrInet portNum iNADDR_ANY)
     putStrLn ("Bound to port " ++ show port)
@@ -27,8 +25,8 @@ connectSock :: HostAddress -> Int -> ConSock Socket -> IO ()
 connectSock addr port (ConSock conn_status) = do
     sock <- socket AF_INET Stream 0
     setSocketOption sock ReuseAddr 1
-    setSocketOption sock SendTimeOut 100
-    setSocketOption sock RecvTimeOut 100
+    --setSocketOption sock SendTimeOut 100
+    --setSocketOption sock RecvTimeOut 100
     -- convert Int to Integer to PortNumber
     let portNum = fromInteger(toInteger port) :: PortNumber
     putStrLn ("Attempting to connect to " ++ show addr ++ " at port " ++ show port)

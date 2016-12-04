@@ -17,6 +17,7 @@ sendGuess sock point = do
         Left ex -> do
             sendGuess sock point
         Right h -> do
+            putStrLn (show h)
             return h
 
 sendGuessHelper :: Socket -> (Int, Int) -> IO Int
@@ -94,10 +95,11 @@ engageBattleNet ownPort destAddr destPort starter = do
     opponentSock <- takeMVar conn_status 
     clientSock <- takeMVar port_status
 
-    return opponentSock
+    --return opponentSock
    
-    --fireAllCannons opponentSock (0,0) starter
-    --connectionClose clientSock opponentSock
+    fireAllCannons opponentSock (0,0) starter
+    connectionClose clientSock opponentSock
+    return opponentSock
 
 fireAllCannons :: Socket -> (Int, Int) -> Bool -> IO ()
 fireAllCannons sock guess starter = do
