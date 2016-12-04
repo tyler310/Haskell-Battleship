@@ -1,7 +1,7 @@
 -- CPSC 312 - 2016 - Games in Haskell
 module Battleship where
 
--- import battleNet
+-- import BattleNet
 import Control.Monad
 import GameBoard
 
