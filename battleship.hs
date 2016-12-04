@@ -20,6 +20,7 @@ check_if_boat coord lst
 --update_board :: [(Int, Int)] -> [(Int, Int)]
     
 -- guess: gets user's guess, send it, update board (hit/miss), signal end of turn
+guess :: IO ((Int, Int), Bool)
 guess = do
     putStrLn "Enter your target (row, column): "
     g <- getLine
@@ -29,21 +30,24 @@ guess = do
     let ans = check_if_boat input p_board -- replace this with the send guess function
     return (input, ans)
     
-    
+update_board :: (Int, Int) -> Bool -> [(Int, Int)] -> [(Int, Int)]
 update_board g hit lst
     | hit == True = g:lst
     | otherwise = lst
     
 -- print_border prints the top/bottom boards
+print_border :: Int -> IO ()
+
 print_border 0 = do 
     putStrLn ("+")
     return ()
-    
+ 
 print_border n = do
     putStr ("+----")
     print_border (n-1)
 
 -- print_col_num prints the column numbers for the user    
+print_col_num :: Int -> Int -> IO ()
 print_col_num x 0 = do
     putStr("\n")
     return()
@@ -52,10 +56,13 @@ print_col_num x col = do
     putStr("  " ++ show x ++ "  ")
     print_col_num (x+1) (col-1)
 
+print_end :: String -> IO ()    
 print_end str = do
     putStrLn str
     return()
+    
 -- print_row prints a row from the gameboard, including any boats as X's
+print_row :: Int -> Int -> Int -> [(Int, Int)] -> [(Int, Int)] -> IO ()
 print_row x y col boats hit_boats
     | x == col = print_end("|")
     | check_if_boat (x,y) hit_boats = print_cell("| X  ")
@@ -66,7 +73,8 @@ print_row x y col boats hit_boats
             putStr(str)
             print_row (x+1) y col boats hit_boats
 
--- print_board prints all the rows of the game grid            
+-- print_board prints all the rows of the game grid       
+print_board :: Int -> Int -> Int -> [(Int, Int)] -> [(Int, Int)] -> IO ()  
 print_board y 0 col boats hit_boats = do
     return()
   
@@ -80,6 +88,7 @@ print_board y row col boats hit_boats = do
 -- col: the number of columns
 -- boats: the list of boats to display
 -- example (prints empty grid)    print_screen 5 5 []
+print_screen :: Int -> Int -> [(Int, Int)] -> [(Int, Int)] -> IO ()
 print_screen row col boats hit_boats = do
     putStr("   ")
     print_col_num 0 col
@@ -89,7 +98,8 @@ print_screen row col boats hit_boats = do
     putStr("  ")
     print_border col
     return()
-    
+
+check_win_lose :: Int -> [(Int, Int)] -> Bool    
 check_win_lose n ob = check_win_lose_2 n ob 0
 check_win_lose_2 n ob tot
     | n > 1 = (check_win_lose_2 (n-1) ob (tot+n))
@@ -97,14 +107,14 @@ check_win_lose_2 n ob tot
 
 
 -- check_lose
-    
+start_game :: IO ()    
 start_game = do
     putStrLn("Your grid (B = boat, X = hit): ")
     a <-  create_all_ships max_ship_size max_row max_col []
     putStrLn(show a)
     main a [] [] []
     
-    
+main :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> IO ()     
 main gb ob hit_boats guesses = do
     -- Show your game board + your progress
     putStrLn("YOU: ")
