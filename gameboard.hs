@@ -92,8 +92,3 @@ create_all_ships n row col boats = do
         else
             create_all_ships n row col boats
        
-
-
-
-
-

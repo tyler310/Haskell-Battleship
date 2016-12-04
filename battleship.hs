@@ -96,24 +96,24 @@ start_game = do
     a <-  create_all_ships 5 7 7 []
     putStrLn(show a)
     print_screen 7 7 a
-    return()
+    main a [] []
     
 
-main gb = forever $ do
+main gb ob guesses = do
     -- Guess
     (g, ans) <- guess
     -- Update the o_board depending on the result
-    let new_o_board = update_board g ans o_board
-    let o_board = new_o_board
+    let new_guesses = (g : guesses)
+    let new_o_board = update_board g ans ob
     
     -- Accept the guess and check if it's right using check_guess
     
     -- Send the True/False (hit/miss) back
-    
-    putStrLn(show o_board)
-    guess
+    putStr("correct guesses ")
+    putStrLn(show new_o_board)
+    putStr("all guesses ")
+    putStrLn(show new_guesses)
+    main gb new_o_board new_guesses
 
 
--- need a start_game that does the set up and calls main   
--- has some welcome msg 
     
