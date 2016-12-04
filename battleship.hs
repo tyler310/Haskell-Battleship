@@ -22,12 +22,14 @@ check_if_boat coord lst
 -- guess: gets user's guess, send it, update board (hit/miss), signal end of turn
 guess :: IO ((Int, Int), Bool)
 guess = do
+    -- get the player's guess
     putStrLn "Enter your target (row, column): "
     g <- getLine
     putStrLn ("You guessed " ++ g)
     let input = read g
+    
     -- need to SEND the guess, remove line below
-    let ans = check_if_boat input p_board -- replace this with the send guess function
+    let ans = check_if_boat input p_board -- replace this with the send guess function, ans should be the bool reply
     return (input, ans)
     
 update_board :: (Int, Int) -> Bool -> [(Int, Int)] -> [(Int, Int)]
@@ -61,7 +63,7 @@ print_end str = do
     putStrLn str
     return()
     
--- print_row prints a row from the gameboard, including any boats as X's
+-- print_row prints a row from the gameboard, including any boats as B's and hits as X's
 print_row :: Int -> Int -> Int -> [(Int, Int)] -> [(Int, Int)] -> IO ()
 print_row x y col boats hit_boats
     | x == col = print_end("|")
@@ -99,6 +101,7 @@ print_screen row col boats hit_boats = do
     print_border col
     return()
 
+-- checks the win condition
 check_win_lose :: Int -> [(Int, Int)] -> Bool    
 check_win_lose n ob = check_win_lose_2 n ob 0
 check_win_lose_2 n ob tot
@@ -106,14 +109,16 @@ check_win_lose_2 n ob tot
     | n <= 1  = ((length ob) == tot)
 
 
--- check_lose
+-- sets up the game board by placing the ships, starts the game by calling main
 start_game :: IO ()    
 start_game = do
     putStrLn("Your grid (B = boat, X = hit): ")
     a <-  create_all_ships max_ship_size max_row max_col []
     putStrLn(show a)
     main a [] [] []
-    
+
+
+-- the main game function    
 main :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> IO ()     
 main gb ob hit_boats guesses = do
     -- Show your game board + your progress
@@ -122,15 +127,23 @@ main gb ob hit_boats guesses = do
     putStrLn("OPPONENT: ")
     print_screen max_row max_col ob ob
 
-
-    -- Guess
+    -- TODO: possibly create a player 2 that accepts a guess first, THEN sends the guess (but otherwise the same)
+    -- Get user guess
     (g, ans) <- guess
     -- Update the o_board depending on the result
     let new_guesses = (g : guesses)
     let new_o_board = update_board g ans ob
     
-    -- Accept the guess and check if it's right using check_if_boat
-    -- add it to the hit_boats using update_board
+    -- TODO
+    -- 1) Accept the opponent guess 
+    -- 2) Check if it's right using check_if_boat
+    -- 3) Add it to the hit_boats using update_board (just like new_o_board above)
+    
+    
+    
+    
+    
+    -- we check if we won/lost, otherwise progress to the next turn
     let win = check_win_lose max_ship_size new_o_board
     let lose = check_win_lose max_ship_size hit_boats
     if win
@@ -147,7 +160,7 @@ main gb ob hit_boats guesses = do
                 putStrLn(show new_o_board)
                 putStr("all guesses ")
                 putStrLn(show new_guesses)
-                main gb new_o_board hit_boats new_guesses
+                main gb new_o_board hit_boats new_guesses -- TODO replace hit_boats with the name for the updated list
 
 
     

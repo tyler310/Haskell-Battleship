@@ -4,7 +4,7 @@ import System.Random
 import Control.Monad
 
 
-
+-- checks that placing a ship has no conflicts with existing ships
 check_pos :: (Int, Int) -> Int -> Int -> Int -> Int -> [(Int, Int)] -> Bool
 check_pos (x,y) dir len row col boats
     | dir == 1 = check_pos_r (x,y) len row col boats
@@ -58,12 +58,13 @@ place_ship_u (x,y) len
     | len > 0 = (x,y) : place_ship_u (x,(y-1)) (len-1)
     | otherwise = []      
 
+-- adds a coordinate to the beginning of a coordinate list
 prepend_list :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)]
 prepend_list [] lst = lst
 prepend_list (h:t) lst = h : prepend_list t lst
     
 -- creates a list of coords of a ship, if it doesn't overlap with any existing ships
--- 1 = build ship to the right
+-- dir is 1 = build ship to the right
 -- 2 = down
 -- 3 = left
 -- 4 = up
@@ -86,7 +87,9 @@ create_all_ships 2 row col boats = do
             return (create_ship dir (x,y) 2 row col boats)
         else
             create_all_ships 2 row col boats
-    
+
+-- places all the ships so there are no conflicts (keeps trying until no conflicts)
+-- if n is 4, creates a 4 length ship then 3 length ship then 2 length ship (no 1 length ships)            
 create_all_ships n row col boats = do
     x <- randomRIO(0,(col-1)) :: IO Int
     y <- randomRIO(0,(row-1)) :: IO Int
