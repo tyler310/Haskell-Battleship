@@ -21,17 +21,17 @@ check_if_boat coord lst
 --update_board :: [(Int, Int)] -> [(Int, Int)]
     
 -- guess: gets user's guess, send it, update board (hit/miss), signal end of turn
-guess :: IO ((Int, Int), Bool)
-guess = do
+guess :: Socket -> IO ((Int, Int), Bool)
+guess sock = do
     -- get the player's guess
     putStrLn "Enter your target (row, column): "
     g <- getLine
     putStrLn ("You guessed " ++ g)
     let input = read g
-    
+    sendGuess sock input
     -- need to SEND the guess, remove line below
-    let ans = check_if_boat input p_board -- replace this with the send guess function, ans should be the bool reply
-    return (input, ans)
+    let (ans, win) = getResultGuess sock -- replace this with the send guess function, ans should be the bool reply
+    return (input, ans, win)
     
 update_board :: (Int, Int) -> Bool -> [(Int, Int)] -> [(Int, Int)]
 update_board g hit lst
@@ -118,12 +118,12 @@ start_game ownPort destAddr destPort starter = do
     putStrLn("Your grid (B = boat, X = hit): ")
     a <-  create_all_ships max_ship_size max_row max_col []
     putStrLn(show a)
-    main a [] [] []
+    main a [] [] [] opp_sock
 
 
 -- the main game function    
 main :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> IO ()     
-main gb ob hit_boats guesses = do
+main gb ob hit_boats guesses sock = do
     -- Show your game board + your progress
     putStrLn("YOU: ")
     print_screen max_row max_col gb hit_boats
@@ -132,7 +132,7 @@ main gb ob hit_boats guesses = do
 
     -- TODO: possibly create a player 2 file that accepts a guess first, THEN sends the guess (but otherwise the same)
     -- Get user guess
-    (g, ans) <- guess
+    (g, ans, win) <- guess sock
     -- Update the o_board depending on the result
     let new_guesses = (g : guesses)
     let new_o_board = update_board g ans ob
@@ -141,14 +141,13 @@ main gb ob hit_boats guesses = do
     -- 1) Accept the opponent guess 
     -- 2) Check if it's right using check_if_boat
     -- 3) Add it to the hit_boats using update_board (just like new_o_board above)
+    o_guess <- getGuess
+    let o_hit = check_if_boat o_guess gb
+    let new_hit_boats = update_board o_guess o_hit gb
+    let lose = check_win_lose max_ship_size new_hit_boats
+    sendResultGuess sock (o_hit, lose)
+     
     
-    
-    
-    
-    
-    -- we check if we won/lost, otherwise progress to the next turn
-    let win = check_win_lose max_ship_size new_o_board
-    let lose = check_win_lose max_ship_size hit_boats
     if win
         then do
             print_screen max_row max_col ob ob
