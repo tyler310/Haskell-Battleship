@@ -22,16 +22,18 @@ check_if_boat coord lst
 --update_board :: [(Int, Int)] -> [(Int, Int)]
     
 -- guess: gets user's guess, send it, update board (hit/miss), signal end of turn
-guess :: Socket -> IO ((Int, Int), Bool, Bool)
-guess sock = do
+guess :: Socket -> Socket -> IO ((Int, Int), Bool, Bool)
+guess readSock writeSock = do
     -- get the player's guess
     putStrLn "Enter your target (row, column): "
     g <- getLine
     putStrLn ("You guessed " ++ g)
     let input = read g
-    sendGuess sock input
+    
+    res <- myTurn readSock writeSock input
+    -- sendGuess sock input
     -- need to SEND the guess, remove line below
-    res <- getResultGuess sock -- replace this with the send guess function, ans should be the bool reply
+    -- res <- getResultGuess sock -- replace this with the send guess function, ans should be the bool reply
     let (ans, win) = res
     return (input, ans, win)
     
@@ -113,59 +115,66 @@ check_win_lose_2 n ob tot
 
 
 -- sets up the game board by placing the ships, starts the game by calling main
-start_game:: Int -> [Int] -> Int -> Bool -> IO ()
-start_game ownPort destAddr destPort starter = do
-    opp_sock <- engageBattleNet ownPort (toHostAddress (toIPv4 destAddr)) destPort starter
+start_game:: Int -> Int -> Bool -> IO ()
+start_game ownPort destPort starter = do
+    socks <- engageBattleNet ownPort (toHostAddress (toIPv4 [127,0,0,1])) destPort starter
     
     putStrLn("Your grid (B = boat, X = hit): ")
     a <-  create_all_ships max_ship_size max_row max_col []
     putStrLn(show a)
-    main a [] [] [] opp_sock
+    main a [] [] [] socks starter
 
 
 -- the main game function    
-main :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> Socket -> IO ()     
-main gb ob hit_boats guesses opp_sock = do
+main :: [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> [(Int, Int)] -> (Socket, Socket) -> Bool -> IO ()     
+main gb ob hit_boats guesses socks starter = do
     -- Show your game board + your progress
     putStrLn("YOU: ")
     print_screen max_row max_col gb hit_boats
     putStrLn("OPPONENT: ")
     print_screen max_row max_col ob ob
 
-    -- TODO: possibly create a player 2 file that accepts a guess first, THEN sends the guess (but otherwise the same)
-    -- Get user guess
-    (g, ans, win) <- guess opp_sock
-    -- Update the o_board depending on the result
-    let new_guesses = (g : guesses)
-    let new_o_board = update_board g ans ob
-    
-    -- TODO
-    -- 1) Accept the opponent guess 
-    -- 2) Check if it's right using check_if_boat
-    -- 3) Add it to the hit_boats using update_board (just like new_o_board above)
-    o_guess <- getGuess opp_sock
-    let o_hit = check_if_boat o_guess gb
-    let new_hit_boats = update_board o_guess o_hit gb
-    let lose = check_win_lose max_ship_size new_hit_boats
-    sendResultGuess opp_sock (o_hit, lose)
-     
-    
-    if win
+    let readSock = (fst socks)
+    let writeSock = (snd socks)
+
+    if starter
         then do
-            print_screen max_row max_col ob ob
-            putStrLn("You win!")
-            return()
-        else if lose
-            then do
-                putStrLn("YOU LOSE!")
-                return()
-            else do  
-                putStr("correct guesses ")
-                putStrLn(show new_o_board)
-                putStr("all guesses ")
-                putStrLn(show new_guesses)
-                main gb new_o_board hit_boats new_guesses opp_sock-- TODO replace hit_boats with the name for the updated list
+            -- TODO: possibly create a player 2 file that accepts a guess first, THEN sends the guess (but otherwise the same)
+            -- Get user guess
+            (g, ans, win) <- guess readSock writeSock
+            -- Update the o_board depending on the result
+            let new_guesses = (g : guesses)
+            let new_o_board = update_board g ans ob
+            putStr("correct guesses ")
+            putStrLn(show new_o_board)
+            putStr("all guesses ")
+            putStrLn(show new_guesses)
+            main gb new_o_board hit_boats new_guesses socks (not starter)-- TODO replace hit_boats with the name for the updated list
 
-
-
+        else do
+            -- TODO
+            -- 1) Accept the opponent guess 
+            -- 2) Check if it's right using check_if_boat
+            -- 3) Add it to the hit_boats using update_board (just like new_o_board above)
+            o_guess <- getGuess readSock
+            let o_hit = check_if_boat o_guess gb
+            let new_hit_boats = update_board o_guess o_hit gb
+            let lose = check_win_lose max_ship_size new_hit_boats
+            sendResultGuess writeSock (o_hit, lose)
+            
+            if win
+                then do
+                    print_screen max_row max_col ob ob
+                    putStrLn("You win!")
+                    return()
+                else if lose
+                    then do
+                        putStrLn("YOU LOSE!")
+                        return()
+                    else do  
+                        putStr("correct guesses ")
+                        putStrLn(show new_o_board)
+                        putStr("all guesses ")
+                        putStrLn(show new_guesses)
+                        main gb new_o_board hit_boats new_guesses socks (not starter)-- TODO replace hit_boats with the name for the updated list
 

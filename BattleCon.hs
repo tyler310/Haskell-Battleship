@@ -21,6 +21,7 @@ openSock port (ConSock status) = do
     putStrLn ("Connected to: " ++ show (snd conn))
     putMVar status (fst conn)
 
+
 connectSock :: HostAddress -> Int -> ConSock Socket -> IO ()
 connectSock addr port (ConSock conn_status) = do
     sock <- socket AF_INET Stream 0

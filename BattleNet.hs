@@ -10,6 +10,7 @@ import Data.List.Split
 import Control.Concurrent
 import Control.Exception
 
+
 sendGuess :: Socket -> (Int, Int) -> IO Int
 sendGuess sock point = do 
     result <- try (sendGuessHelper sock point) :: IO (Either SomeException Int)
@@ -39,6 +40,7 @@ getResultGuessHelper :: Socket -> IO (Bool, Bool)
 getResultGuessHelper sock = do
     --putStrLn ("Getting guess result...")
     rcvData <- recv sock 256
+    putStrLn ("Got : " ++ rcvData)
     let data_arr = splitOn "," rcvData
     let frst_str = head(data_arr)
     let scnd_str = head(tail(data_arr))
@@ -80,55 +82,57 @@ sendResultGuessHelper sock result = do
 
 -- Main Functions
 
-engageBattleNet :: Int -> HostAddress -> Int -> Bool -> IO Socket
+engageBattleNet :: Int -> HostAddress -> Int -> Bool ->  IO (Socket, Socket)
 engageBattleNet ownPort destAddr destPort starter = do
     port_status <- newEmptyMVar
     conn_status <- newEmptyMVar
         
-    
     forkIO (openSock ownPort (ConSock port_status))
     clientSock <- takeMVar port_status
 
     forkIO (connectSock destAddr destPort (ConSock conn_status))
     
     -- now both are ready
-    opponentSock <- takeMVar conn_status 
-    clientSock <- takeMVar port_status
+    readSock <- takeMVar conn_status 
+    writeSock <- takeMVar port_status
 
-    --return opponentSock
-   
-    --fireAllCannons opponentSock (0,0) starter
+    -- fireAllCannons readSock writeSock (0,0) starter
     --connectionClose clientSock opponentSock
-    return opponentSock
+    
+    return (readSock, writeSock)
 
-fireAllCannons :: Socket -> (Int, Int) -> Bool -> IO ()
-fireAllCannons sock guess starter = do
-    if starter
-        then myTurn sock guess
-        else do
-            theirTurn sock
 
-myTurn :: Socket -> (Int, Int) -> IO()
-myTurn sock guess = do
+-- fireAllCannons :: Socket -> Socket -> (Int, Int) -> Bool -> IO ()
+-- fireAllCannons readSock writeSock guess starter = do
+--     if starter
+--         then myTurn readSock writeSock guess
+--         else do
+--             theirTurn readSock writeSock
+
+myTurn :: Socket -> Socket -> (Int, Int) -> IO(Bool, Bool)
+myTurn readSock writeSock guess = do
     -- our turn --
-    let bytes_sent = sendGuess sock guess
+    bytes_sent <- sendGuess writeSock guess
     let prt_str = "Guessed: " ++ show (fst guess) ++ show (snd guess)
     putStrLn prt_str
-    result <- getResultGuess sock
+    putStrLn "Getting Result..."
+    result <- getResultGuess readSock
     let prt_str = "Got back - Hit: " ++ show (fst result) ++ " Win: " ++ show (snd result)
     putStrLn prt_str
     -- TODO: act on result
-    theirTurn sock
+    -- theirTurn readSock writeSock
+    return result
     
-theirTurn :: Socket -> IO ()
-theirTurn sock = do
+theirTurn :: Socket -> Socket -> IO ()
+theirTurn readSock writeSock = do
     -- Their Turn --
-    guess <- getGuess sock
+    guess <- getGuess readSock
     let prt_str = "They Guessed X: " ++ show (fst guess) ++ " Y: " ++ show (snd guess)
     putStrLn prt_str
     -- TODO: validate guess
     let our_result = (True, False)
     let prt_str = "Sending our result of Hit: " ++ show (fst our_result) ++ " Win: " ++ show (snd our_result)
     putStrLn prt_str
-    sendResultGuess sock our_result
-    myTurn sock (0,0)
+    sendResultGuess writeSock our_result
+    --myTurn readSock writeSock (0,1)
+    return ()
